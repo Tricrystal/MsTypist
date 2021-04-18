@@ -1,0 +1,11 @@
+# Default ignored files
+*.docx
+*.doc
+*.xls
+*.xlsx
+/.idea/workspace.xml
+/shelf/
+/out/
+/input/
+/output/
+/target/
