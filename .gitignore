@@ -3,6 +3,7 @@
 *.doc
 *.xls
 *.xlsx
+/.idea/
 /.idea/workspace.xml
 /shelf/
 /out/
