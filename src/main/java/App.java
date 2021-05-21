@@ -7,7 +7,6 @@ import java.io.*;
 import java.io.File;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.*;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
@@ -15,7 +14,7 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTR;
 import org.apache.poi.xwpf.usermodel.TextSegment;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-
+import com.deepoove.poi.XWPFTemplate;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
@@ -70,14 +69,9 @@ public class App {
         return result;
     }
 
-
-    public static String replaceWithTag(String oriStr, String target, String replacement) {
-        return oriStr.replaceAll("\\$" + target + "\\$", replacement);
-    }
-
     public static String replaceFromDict(String str, Map<String, String> dict) {
         for (Map.Entry<String, String> entry : dict.entrySet()) {
-            str = str.replaceAll("\\$" + entry.getKey() + "\\$", entry.getValue());
+            str = str.replaceAll("\\{\\{" + entry.getKey() + "}}", entry.getValue());
         }
         return str;
     }
@@ -100,24 +94,9 @@ public class App {
         for (File baseDocx : baseDocxList) {
             String baseDocxName = baseDocx.getName();
             String newDocxName = replaceFromDict(baseDocxName, replaceMap);
-            XWPFDocument document = new XWPFDocument(OPCPackage.open(baseDocx));
-            for (XWPFParagraph paragraph : document.getParagraphs()) {
-                searchAndReplace(paragraph, replaceMap);
-            }
-            //  获取表单 遍历表格
-            for (XWPFTable table : document.getTables()) {
-                // 遍历行
-                for (XWPFTableRow tr : table.getRows()) {
-                    // 遍历列
-                    for (XWPFTableCell tableCell : tr.getTableCells()) {
-                        // 遍历单元格中的数据
-                        for (XWPFParagraph paragraph : tableCell.getParagraphs()) {
-                            // 获取单元格中的数据
-                            searchAndReplace(paragraph, replaceMap);
-                        }
-                    }
-                }
-            }
+            //render
+            XWPFTemplate document = XWPFTemplate.compile(baseDocx).render(replaceMap);
+            //out document
             FileOutputStream outStream = new FileOutputStream(path + "\\" + newDocxName);
             document.write(outStream);
             document.close();
